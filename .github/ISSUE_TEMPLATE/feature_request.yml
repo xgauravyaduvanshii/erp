@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement to ERP
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What workflow is missing?
+      description: Describe the pain point in your current setup.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed idea
+      description: Share how you think ERP could help.
+  - type: textarea
+    id: context
+    attributes:
+      label: Extra context
+      description: Include project shape, Electron tooling, and any constraints.
