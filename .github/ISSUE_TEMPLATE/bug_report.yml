@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem in ERP
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands used
+      description: Share the exact `erp start` or `erp connect` commands.
+      placeholder: |
+        erp start --port 7700 --vite-port 5173
+        erp connect user@host --key ~/.ssh/id_rsa --project /srv/app
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, Electron version, local OS, and remote host details.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant terminal output.
