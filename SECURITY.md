@@ -16,7 +16,7 @@ Please avoid opening a public issue for a suspected vulnerability.
 
 Instead:
 
-1. Email `xgauravyaduvanshii@gamil.com`
+1. Email `xgauravyaduvanshii@gmail.com`
 2. Include reproduction steps, impact, and affected version details
 3. Share whether the issue is configuration-specific or reproducible by default
 
