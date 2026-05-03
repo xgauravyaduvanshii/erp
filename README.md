@@ -1,58 +1,104 @@
-# erp
+# ERP
 
-Electron Remote Preview for developing an Electron renderer on a remote machine while viewing it in a local Electron shell.
+> Electron Remote Preview for developing an Electron renderer on a remote machine while driving it from a local Electron shell.
 
-`erp` gives you two commands:
+[![CI](https://github.com/xgauravyaduvanshii/erp/actions/workflows/ci.yml/badge.svg)](https://github.com/xgauravyaduvanshii/erp/actions/workflows/ci.yml)
+[![Package Smoke](https://github.com/xgauravyaduvanshii/erp/actions/workflows/package-smoke.yml/badge.svg)](https://github.com/xgauravyaduvanshii/erp/actions/workflows/package-smoke.yml)
+[![Node >= 22](https://img.shields.io/badge/node-%3E%3D22-1f6f43)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0f172a)](./LICENSE)
 
-- `erp start` runs in the remote Electron project, starts the bridge, captures `ipcMain.handle()` registrations, and keeps Vite reachable over SSH.
-- `erp connect` runs locally, opens SSH tunnels with `ssh2`, launches a tiny local Electron shell, and proxies renderer IPC calls back to the remote handlers.
+ERP solves a very specific development problem: your Electron app lives on a remote Linux box, but you still want a fast local preview window, live renderer updates, and working IPC calls back into the remote main process.
 
-## Install
+Instead of screen sharing a full remote desktop, ERP splits the work cleanly:
+
+- `erp start` runs on the remote machine, starts the bridge, discovers or starts Vite, and captures Electron IPC handlers.
+- `erp connect` runs on your local machine, opens SSH tunnels, launches a lightweight Electron shell, and proxies renderer IPC to the remote host.
+
+## Why ERP
+
+- Keep renderer development close to remote-only services, files, and infrastructure.
+- Use a local Electron shell for lower-latency preview and local browser storage.
+- Preserve `ipcMain.handle()` style workflows without wiring a custom tunnel by hand.
+- Reconnect tunnels and WebSocket transport automatically when the connection drops.
+- Stay productive with either full Electron mode or browser-only preview mode.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Local["Local machine"]
+    CLI["erp connect"]
+    Shell["Electron preview shell"]
+    Renderer["Renderer at localhost"]
+  end
+
+  subgraph Transport["Transport"]
+    SSH["SSH tunnels"]
+    WS["WebSocket IPC bridge"]
+  end
+
+  subgraph Remote["Remote machine"]
+    Start["erp start"]
+    Vite["Vite dev server"]
+    Main["Electron main shim"]
+    Watch["File watcher + reload"]
+  end
+
+  CLI --> SSH
+  Shell --> Renderer
+  Renderer -->|HTTP| SSH
+  SSH --> Vite
+  Renderer -->|ipcRenderer.invoke/on| WS
+  WS --> Main
+  Start --> WS
+  Start --> Vite
+  Watch --> Main
+  Watch --> WS
+```
+
+## Requirements
+
+ERP works best when these expectations are true:
+
+- Local machine: Node.js `>=22` and `electron` available where you run `erp connect`
+- Remote machine: SSH access to the app host and a compatible Electron project
+- Remote project: a Vite-based renderer workflow, or a project that already exposes the renderer on a reachable port
+- Shared understanding: ERP proxies renderer IPC and preview traffic, not a full native desktop session
+
+Install globally:
 
 ```bash
 npm install -g erp
 ```
 
-`erp connect` expects `electron` to be available on the local machine where you launch the preview shell. Install it in the directory where you run `erp connect`, or use `--no-electron` if you only want the tunnels:
+Install `electron` locally anywhere you plan to run the preview shell:
 
 ```bash
 npm install electron
 ```
 
-## Usage
+## Quickstart
 
-### 1. Start ERP on the EC2 instance
-
-SSH into the instance, change into your Electron project, and start the bridge:
+### 1. Start ERP in the remote Electron project
 
 ```bash
 cd /path/to/electron-project
 erp start
 ```
 
-Optional flags:
+Optional ports:
 
 ```bash
 erp start --port 7700 --vite-port 5173
 ```
 
-What `erp start` does:
-
-- Starts a WebSocket bridge on `127.0.0.1:7700`
-- Reuses an existing Vite server on `127.0.0.1:5173`, or starts one from the current project
-- Loads the Electron main entry with an Electron shim so `ipcMain.handle()` calls can be invoked remotely
-- Watches project files with `chokidar` and emits HMR/file-change notifications
-- Prints a suggested `erp connect ...` command
-
 ### 2. Connect from your local machine
-
-From your local machine, run:
 
 ```bash
 erp connect ec2-user@1.2.3.4 --key ~/.ssh/mykey.pem --project /path/to/electron-project
 ```
 
-Optional flags:
+With explicit ports:
 
 ```bash
 erp connect ec2-user@1.2.3.4 \
@@ -62,82 +108,91 @@ erp connect ec2-user@1.2.3.4 \
   --project /path/to/electron-project
 ```
 
-`erp connect` will:
-
-- Open `localhost:5173 -> remote:5173`
-- Open `localhost:7700 -> remote:7700`
-- If `--project` is set and the remote ERP bridge is not already running, start `erp start` inside that project over SSH
-- Launch a minimal local Electron window pointed at `http://127.0.0.1:5173`
-- Inject a preload script from a temp file that proxies `ipcRenderer.invoke()` and `ipcRenderer.on()` over WebSocket
-- Print remote console output in the local terminal with a `[remote]` prefix
-- Reconnect the SSH tunnel and WebSocket client when the connection drops
-
-### 3. Browser-only mode
-
-If you want the tunnels without launching Electron:
+### 3. Open browser-only mode when you do not need Electron
 
 ```bash
 erp connect ec2-user@1.2.3.4 --key ~/.ssh/mykey.pem --no-electron
 ```
 
-Then open `http://127.0.0.1:5173` in a normal browser.
+Then open `http://127.0.0.1:5173` in a browser.
 
-## How localStorage works
+## Command Guide
 
-`erp` does not proxy or override `localStorage`, `sessionStorage`, or IndexedDB.
+### `erp start`
 
-The local preview window loads `http://127.0.0.1:5173` in your local Chromium-based Electron shell, so browser storage naturally lives on your local machine. That means:
+Runs inside the remote project and prepares the runtime bridge.
 
-- Renderer storage is fast and fully local
-- Refreshes and HMR keep using the same local browser storage
-- Nothing in storage is sent back through the ERP IPC bridge
+What it does:
 
-Only Electron IPC traffic and renderer console messages are proxied.
+- Starts a WebSocket bridge on `127.0.0.1:7700`
+- Reuses an existing Vite server on `127.0.0.1:5173`, or starts one from the current project
+- Loads the Electron main entry with an Electron shim so remote IPC handlers can be invoked locally
+- Watches project files and emits reload or file-change notifications
+- Prints a suggested `erp connect` command for local use
 
-## Architecture Notes
+### `erp connect`
 
-- The remote side only needs enough Electron behavior to register and invoke `ipcMain.handle()` handlers, so `erp start` uses a lightweight Electron shim instead of a full remote GUI.
-- Remote main-process IPC registrations are reloaded when project files change, so `ipcMain.handle()` updates take effect without restarting `erp start`.
-- `webContents.send()` calls from the remote main process are emitted to local `ipcRenderer.on()` listeners as `ipc-event` messages.
-- The local preload script is written to a temp file at runtime and attached through `BrowserWindow`'s `webPreferences.preload`.
+Runs on the local machine and connects the preview session.
+
+What it does:
+
+- Opens local-to-remote SSH tunnels for Vite and the ERP bridge
+- Optionally starts `erp start` on the remote project if `--project` is provided
+- Launches a minimal local Electron window pointed at the forwarded Vite app
+- Injects a generated preload script that proxies `ipcRenderer.invoke()` and `ipcRenderer.on()`
+- Streams remote renderer console output into the local terminal
+- Reconnects the tunnel and WebSocket client after disconnects
+
+## Local Vs Remote Responsibilities
+
+Local responsibilities:
+
+- Host the preview shell
+- Keep renderer storage local, including `localStorage`, `sessionStorage`, and IndexedDB
+- Display renderer output and forward IPC requests
+
+Remote responsibilities:
+
+- Host the Vite app and the ERP WebSocket bridge
+- Register and invoke remote `ipcMain.handle()` handlers
+- Watch for file changes and reload remote main-process behavior
+
+## Compatibility And Limits
+
+ERP is designed for development workflows, not production packaging.
+
+- Browser storage stays local by design.
+- ERP focuses on renderer preview plus IPC bridging, not full remote Electron API parity.
+- The remote side uses a lightweight Electron shim for handler registration and invocation.
+- Projects with highly customized Electron bootstrapping may need an explicit main entry or a small amount of setup.
 
 ## Troubleshooting
 
 ### Port already in use
 
-If `7700` or `5173` is already taken locally or remotely:
-
-- Stop the process already using the port, or
-- Pick different ports on both sides:
+If `7700` or `5173` is already busy locally or remotely, choose new matching ports:
 
 ```bash
 erp start --port 8800 --vite-port 5273
 erp connect ec2-user@1.2.3.4 --key ~/.ssh/mykey.pem --port 8800 --vite-port 5273
 ```
 
-### SSH auth errors
+### SSH authentication problems
 
-If `erp connect` cannot authenticate:
+- Confirm the `user@host` target
+- Confirm the path passed to `--key`
+- Confirm the private key file is readable
+- Confirm `SSH_AUTH_SOCK` is set if you depend on an SSH agent
 
-- Confirm the username in `user@host`
-- Confirm the PEM path passed to `--key`
-- Check that the file is readable
-- If you rely on an SSH agent, make sure `SSH_AUTH_SOCK` is set
-- If you use `--project`, make sure `erp` is installed on the remote machine too, because ERP may need to start the remote bridge for you
+### Electron not found locally
 
-### Electron not found
+- Install `electron` where you run `erp connect`
+- Or run `erp connect --no-electron` and open the forwarded Vite URL in a normal browser
 
-If `erp connect` says Electron was not found:
+### Vite did not start remotely
 
-- Install `electron` where you run `erp connect`, or
-- Run with `--no-electron` and open the forwarded Vite URL in a browser
-
-### Vite could not be started
-
-If `erp start` cannot find Vite and nothing is already listening on the Vite port:
-
-- Install `vite` in the remote project, or
-- Start the Vite dev server manually and run `erp start` again
+- Make sure the remote project has a working Vite setup
+- Or start the remote Vite server manually and run `erp start` again
 
 ## Development
 
@@ -146,3 +201,13 @@ npm test
 npm run check
 npm run smoke:cli
 ```
+
+## Docs
+
+- [Architecture](./docs/architecture.md)
+- [Getting Started](./docs/getting-started.md)
+- [Development Guide](./docs/development.md)
+- [Troubleshooting Guide](./docs/troubleshooting.md)
+- [Compatibility Notes](./docs/compatibility.md)
+- [Security Model](./docs/security-model.md)
+- [FAQ](./docs/faq.md)
