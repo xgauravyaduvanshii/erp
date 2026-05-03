@@ -2,8 +2,17 @@
   "name": "erp",
   "version": "0.1.0",
   "description": "Electron Remote Preview for tunneling Electron renderer development from remote hosts to a local shell.",
+  "author": "xgauravyaduvanshii <xgauravyaduvanshii@gamil.com>",
+  "homepage": "https://github.com/xgauravyaduvanshii/erp#readme",
   "bin": {
     "erp": "./bin/erp.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xgauravyaduvanshii/erp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xgauravyaduvanshii/erp/issues"
   },
   "files": [
     "bin",
