@@ -31,6 +31,8 @@ Good pull requests usually include:
 - Tests for behavior changes
 - Documentation updates when needed
 
+Use the [pull request template](./.github/pull_request_template.md) so reviewers can quickly validate the change.
+
 Please keep commits focused and explain user-facing behavior clearly in the PR description.
 
 ## Scope
@@ -40,3 +42,5 @@ ERP is a development tool for Electron remote preview. Changes that improve remo
 ## Community Standards
 
 By participating, you agree to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+If you are unsure where to ask for help before contributing, start with [SUPPORT.md](./SUPPORT.md).
