@@ -204,10 +204,14 @@ npm run smoke:cli
 
 ## Docs
 
+- [Documentation Hub](./docs/index.md)
 - [Architecture](./docs/architecture.md)
 - [Getting Started](./docs/getting-started.md)
+- [Command Reference](./docs/command-reference.md)
+- [Examples](./docs/examples.md)
 - [Development Guide](./docs/development.md)
 - [Troubleshooting Guide](./docs/troubleshooting.md)
 - [Compatibility Notes](./docs/compatibility.md)
 - [Security Model](./docs/security-model.md)
 - [FAQ](./docs/faq.md)
+- [Release Checklist](./docs/release-checklist.md)
