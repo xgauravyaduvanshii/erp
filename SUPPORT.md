@@ -5,10 +5,12 @@
 - Open a GitHub issue for reproducible bugs
 - Open a GitHub issue for feature ideas and workflow gaps
 - Include environment details such as Node version, Electron version, remote host type, and the commands you ran
+- Use the issue forms in `.github/ISSUE_TEMPLATE/` so the report arrives with the right context
 
 ## Before Opening A Support Request
 
 - Read the [README](./README.md)
+- Check the [documentation hub](./docs/index.md)
 - Check the [troubleshooting guide](./docs/troubleshooting.md)
 - Check the [FAQ](./docs/faq.md)
 
