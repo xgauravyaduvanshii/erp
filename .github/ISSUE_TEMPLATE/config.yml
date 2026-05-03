@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ERP Support Guide
+    url: https://github.com/xgauravyaduvanshii/erp/blob/main/SUPPORT.md
+    about: Review the support guide before opening a request.
+  - name: ERP Security Policy
+    url: https://github.com/xgauravyaduvanshii/erp/blob/main/SECURITY.md
+    about: Use the private reporting guidance for vulnerabilities.
