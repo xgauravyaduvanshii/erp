@@ -1,0 +1,40 @@
+{
+  "name": "erp",
+  "version": "0.1.0",
+  "description": "Electron Remote Preview for tunneling Electron renderer development from remote hosts to a local shell.",
+  "bin": {
+    "erp": "./bin/erp.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "test",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check ./bin/erp.js && node --check ./src/*.js",
+    "smoke:cli": "node ./bin/erp.js --help"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "electron",
+    "preview",
+    "remote",
+    "ssh",
+    "vite"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "chokidar": "^4.0.3",
+    "commander": "^12.1.0",
+    "ssh2": "^1.16.0",
+    "ws": "^8.18.0"
+  },
+  "peerDependencies": {
+    "electron": ">=29.0.0"
+  }
+}
