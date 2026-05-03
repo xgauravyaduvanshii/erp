@@ -12,3 +12,11 @@ Use this directory when you want deeper context than the root README provides.
 - [Security Model](./security-model.md)
 - [FAQ](./faq.md)
 - [Release Checklist](./release-checklist.md)
+
+Repository policies:
+
+- [Contributing](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Security Policy](../SECURITY.md)
+- [Support Guide](../SUPPORT.md)
+- [Changelog](../CHANGELOG.md)

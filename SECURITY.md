@@ -20,6 +20,8 @@ Instead:
 2. Include reproduction steps, impact, and affected version details
 3. Share whether the issue is configuration-specific or reproducible by default
 
+For non-sensitive setup or troubleshooting problems, use the paths in [SUPPORT.md](./SUPPORT.md) instead of the private disclosure channel.
+
 ## Response Expectations
 
 - Triage confirmation: as quickly as practical
