@@ -1,0 +1,25 @@
+name: Support request
+description: Ask for help with setup or troubleshooting
+title: "[Support]: "
+labels:
+  - support
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Describe the workflow you are setting up.
+    validations:
+      required: true
+  - type: textarea
+    id: blocker
+    attributes:
+      label: Where are you stuck?
+      description: Include the exact command, output, and the step that failed.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: Share local OS, Node version, Electron version, and remote host type.
