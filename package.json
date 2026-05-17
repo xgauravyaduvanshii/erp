@@ -41,7 +41,7 @@
     "chokidar": "^4.0.3",
     "commander": "^12.1.0",
     "ssh2": "^1.16.0",
-    "ws": "^8.18.0"
+    "ws": "^8.20.1"
   },
   "peerDependencies": {
     "electron": ">=29.0.0"
